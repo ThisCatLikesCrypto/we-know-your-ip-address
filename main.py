@@ -99,6 +99,7 @@ try:
     usedswap = get_size(swap.used)
 except Exception as e:
     print(f"Well, shit: {e}")
+    musicgobrr.terminate()
     sys.exit()
 
 timeslept = 0.505
@@ -179,4 +180,5 @@ print("Waiting for song...")
 while True:
     if starttime+13.6<time.time():
         printtheshit()
+        musicgobrr.terminate()
         break
