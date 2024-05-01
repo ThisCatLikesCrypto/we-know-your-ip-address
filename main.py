@@ -11,27 +11,42 @@ import multiprocessing
 from pytube import YouTube
 from playsound import playsound
 import sys
+import random
+
+RED = '\033[38;5;203m'
+ORANGE = '\033[38;5;208m'
+GREEN = '\033[38;5;120m'
+YELLOW = '\033[38;5;226m'
+BLUE = '\033[38;5;117m' #dark-aqua sort of colour
+BLUE2 = '\033[96m' #darker blue
+
+def producesyntaxed(text):
+    try:
+        colour = random.choice([RED, ORANGE, GREEN, YELLOW, BLUE, BLUE2])
+        sys.stdout.write(colour + text + '\033[0m' + "\n")
+    except Exception as e:
+        print(text)
 
 #Audio downloader (from youtube)
 def download_audio(yt_link):
-    print(f"Downloading new background song with link {yt_link}...")
+    producesyntaxed(f"Downloading new background song with link {yt_link}...")
     try:
         yt = YouTube(yt_link)
         audio_stream = yt.streams.filter(only_audio=True).first()
         audio_file = audio_stream.download(os.path.join(os.getcwd(), "resources"), "song.mp4")
-        print("Success")
+        producesyntaxed("Success")
         return audio_file
     except Exception as e:
-        print("Error downloading audio:" + str(e))
+        producesyntaxed("Error downloading audio:" + str(e))
         return None
 
 def play_song():
     try:
         playsound(os.path.join(os.getcwd(), "resources", "song.mp4"))
     except Exception as e:
-        print("playsound error "+ str(e))
+        producesyntaxed("playsound error "+ str(e))
 
-print("Checking for song presence...")
+producesyntaxed("Checking for song presence...")
 if not os.path.exists(os.path.join(os.getcwd(), "resources", "song.mp4")):
     download_audio("https://www.youtube.com/watch?v=VCrxUN8luzI") #Gotta love using YouTube as a CDN
 
@@ -61,124 +76,139 @@ def get_size(bytes, suffix="B"):
             return f"{bytes:.2f}{unit}{suffix}"
         bytes /= factor
 
+def main():
+    global starttime, timeslept, interfaceb4, if_addrs, net_io, extIP, hostname, cpu, uname, boot_time_timestamp, bt, cpufreq, logical, physical, cpuuse, coresuse, svmem, swap, totalmem, availmem, usemem, totalswap, freeswap, usedswap
 
-musicgobrr = multiprocessing.Process(target=play_song)
-musicgobrr.start()
-starttime = time.time()
-if os.name == "nt":
-    os.system('cls')
-else:
-    os.system('clear')
-print("Getting info...")
+    starttime = time.time()
+    timeslept = 0.488
+    interfaceb4 = []
 
-try:
-    if_addrs = psutil.net_if_addrs()
-    net_io = psutil.net_io_counters()
-    extIP = getIP()
-    hostname = socket.gethostname()
-    cpu = get_processor_name().split("@")
-    uname = platform.uname()
-    boot_time_timestamp = psutil.boot_time()
-    bt = datetime.datetime.fromtimestamp(boot_time_timestamp)
-    cpufreq = psutil.cpu_freq()
-    logical = psutil.cpu_count(logical=True)
-    physical = psutil.cpu_count(logical=False)
-    cpuuse = psutil.cpu_percent()
-    coresuse = []
-
-    for i, percentage in enumerate(psutil.cpu_percent(percpu=True, interval=1)):
-        coresuse.append(f"Core {i}: {percentage}%")
-
-    svmem = psutil.virtual_memory()
-    swap = psutil.swap_memory()
-    totalmem = get_size(svmem.total)
-    availmem = get_size(svmem.available)
-    usemem = get_size(svmem.used)
-    totalswap = get_size(swap.total)
-    freeswap = get_size(swap.free)
-    usedswap = get_size(swap.used)
-except Exception as e:
-    print(f"Well, shit: {e}")
-    musicgobrr.terminate()
-    sys.exit()
-
-timeslept = 0.505
-interfaceb4 = []
-
-def printtheshit():
     if os.name == "nt":
         os.system('cls')
     else:
         os.system('clear')
-    print("Computer Name: " + hostname)
+    producesyntaxed("Getting info...")
+
+    try:
+        if_addrs = psutil.net_if_addrs()
+        net_io = psutil.net_io_counters()
+        extIP = getIP()
+        hostname = socket.gethostname()
+        cpu = get_processor_name().split("@")
+        uname = platform.uname()
+        boot_time_timestamp = psutil.boot_time()
+        bt = datetime.datetime.fromtimestamp(boot_time_timestamp)
+        cpufreq = psutil.cpu_freq()
+        logical = psutil.cpu_count(logical=True)
+        physical = psutil.cpu_count(logical=False)
+        cpuuse = psutil.cpu_percent()
+        coresuse = []
+
+        for i, percentage in enumerate(psutil.cpu_percent(percpu=True, interval=1)):
+            coresuse.append(f"Core {i}: {percentage}%")
+
+        svmem = psutil.virtual_memory()
+        swap = psutil.swap_memory()
+        totalmem = get_size(svmem.total)
+        availmem = get_size(svmem.available)
+        usemem = get_size(svmem.used)
+        totalswap = get_size(swap.total)
+        freeswap = get_size(swap.free)
+        usedswap = get_size(swap.used)
+
+        if os.name == "nt":
+            os.system('cls')
+        else:
+            os.system('clear')
+
+        producesyntaxed("Waiting for song...")
+
+        while True:
+            if starttime+13.6<time.time():
+                producesyntaxedtheshit()
+                break
+    except Exception as e:
+        producesyntaxed(f"Well, shit: {e}")
+        musicgobrr.terminate()
+        sys.exit()
+
+
+def producesyntaxedtheshit():
+    if os.name == "nt":
+        os.system('cls')
+    else:
+        os.system('clear')
+    producesyntaxed("Computer Name: " + hostname)
     time.sleep(timeslept)
-    print("External IP: " + extIP)
+    producesyntaxed("External IP: " + extIP)
     time.sleep(timeslept)
+    interfaceno = 0
     for interface_name, interface_addresses in if_addrs.items():
-            print(f"Interface: {interface_name}")
+        if interfaceno <= 2:
+            producesyntaxed(f"Interface: {interface_name}")
+            macno = 0
             interfaceb4.append(interface_name)
+            interfaceno = interfaceno + 1
             time.sleep(timeslept)
             for address in interface_addresses:
-                print(f"    MAC Address: {address.address}")
-                time.sleep(timeslept)
-                print(f"        Netmask: {address.netmask}")
-                time.sleep(timeslept)
-                print(f"        Broadcast MAC: {address.broadcast}")
-                time.sleep(timeslept)
-    print("System Type: " + os.name)
+                if macno <= 3:
+                    producesyntaxed(f"    MAC Address: {address.address}")
+                    time.sleep(timeslept)
+                    producesyntaxed(f"        Netmask: {address.netmask}")
+                    time.sleep(timeslept)
+                    producesyntaxed(f"        Broadcast MAC: {address.broadcast}")
+                    time.sleep(timeslept)
+                    macno+=1
+    producesyntaxed("System Type: " + os.name)
     time.sleep(timeslept)
-    print("OS Name: " + uname.system)
+    producesyntaxed("OS Name: " + uname.system)
     time.sleep(timeslept)
-    print(f"Machine: {uname.machine}")
+    producesyntaxed(f"Machine: {uname.machine}")
     time.sleep(timeslept)
-    print(f"Boot Time: {bt.year}-{bt.month}-{bt.day} {bt.hour}:{bt.minute}:{bt.second}")
+    producesyntaxed(f"Boot Time: {bt.year}-{bt.month}-{bt.day} {bt.hour}:{bt.minute}:{bt.second}")
     time.sleep(timeslept)
 
-    print("CPU:" + cpu[0])
+    producesyntaxed("CPU:" + cpu[0])
     time.sleep(timeslept)
-    print("CPU speed: " + cpu[1].removeprefix(" "))
+    try:
+        producesyntaxed("CPU speed: " + cpu[1].removeprefix(" "))
+        time.sleep(timeslept)
+    except:
+        pass
+    producesyntaxed(f"Physical cores: {physical}")
     time.sleep(timeslept)
-    print(f"Physical cores: {physical}")
+    producesyntaxed(f"Total cores: {logical}")
     time.sleep(timeslept)
-    print(f"Total cores: {logical}")
+    producesyntaxed(f"Current Frequency: {cpufreq.current:.2f}Mhz")
     time.sleep(timeslept)
-    print(f"Current Frequency: {cpufreq.current:.2f}Mhz")
-    time.sleep(timeslept)
-    print("Cores usage: ")
+    producesyntaxed("Cores usage: ")
     time.sleep(timeslept)
 
     for core in coresuse:
-        print(f"    {core}")
+        producesyntaxed(f"    {core}")
         time.sleep(timeslept)
 
-    print(f"Total CPU Usage: {cpuuse}%")
+    producesyntaxed(f"Total CPU Usage: {cpuuse}%")
     time.sleep(timeslept)
 
-    print(f"Total Memory Usage: {totalmem}")
+    producesyntaxed(f"Total Memory Usage: {totalmem}")
     time.sleep(timeslept)
-    print(f"Available Memory: {availmem}")
+    producesyntaxed(f"Available Memory: {availmem}")
     time.sleep(timeslept)
-    print(f"Used Memory: {usemem}")
+    producesyntaxed(f"Used Memory: {usemem}")
     time.sleep(timeslept)
-    print(f"Percentage of Memory Used: {svmem.percent}%")
+    producesyntaxed(f"Percentage of Memory Used: {svmem.percent}%")
     time.sleep(timeslept)
 
-    print(f"Total Swap Usage: {totalswap}")
+    producesyntaxed(f"Total Swap Usage: {totalswap}")
     time.sleep(timeslept)
-    print(f"Free Swap: {freeswap}")
+    producesyntaxed(f"Free Swap: {freeswap}")
     time.sleep(timeslept)
-    print(f"Used Swap: {usedswap}")
+    producesyntaxed(f"Used Swap: {usedswap}")
     time.sleep(timeslept)
-    print(f"Percentage of Swap Used: {swap.percent}%")
+    producesyntaxed(f"Percentage of Swap Used: {swap.percent}%")
 
-if os.name == "nt":
-    os.system('cls')
-else:
-    os.system('clear')
-print("Waiting for song...")
-
-while True:
-    if starttime+13.6<time.time():
-        printtheshit()
-        musicgobrr.terminate()
-        break
+if __name__ == "__main__":
+    musicgobrr = multiprocessing.Process(target=play_song)
+    musicgobrr.start()
+    main()
