@@ -12,6 +12,10 @@ from pytube import YouTube
 from playsound import playsound
 import sys
 import random
+import geocoder
+from geopy.geocoders import Nominatim
+import ipaddress
+
 
 RED = '\033[38;5;203m'
 ORANGE = '\033[38;5;208m'
@@ -69,6 +73,12 @@ def getIP():
     d = str(urlopen('http://checkip.dyndns.com/').read())
     return re.compile(r'Address: (\d+\.\d+\.\d+\.\d+)').search(d).group(1)
 
+def getIPV6(ip4):
+    ip4 = ipaddress.IPv4Address(ip4)
+    prefix6to4 = int(ipaddress.IPv6Address("2002::"))
+    ip6 = ipaddress.IPv6Address(prefix6to4 | (int(ip4) << 80))
+    return ip6
+
 def get_size(bytes, suffix="B"):
     factor = 1024
     for unit in ["", "K", "M", "G", "T", "P"]:
@@ -77,7 +87,7 @@ def get_size(bytes, suffix="B"):
         bytes /= factor
 
 def main():
-    global starttime, timeslept, interfaceb4, if_addrs, net_io, extIP, hostname, cpu, uname, boot_time_timestamp, bt, cpufreq, logical, physical, cpuuse, coresuse, svmem, swap, totalmem, availmem, usemem, totalswap, freeswap, usedswap
+    global starttime, timeslept, ipv6, interfaceb4, hostip, if_addrs, net_io, extIP, hostname, cpu, uname, haddress, boot_time_timestamp, bt, cpufreq, logical, physical, cpuuse, coresuse, svmem, swap, totalmem, availmem, usemem, totalswap, freeswap, usedswap, latitude, longitude
 
     starttime = time.time()
     timeslept = 0.488
@@ -94,6 +104,8 @@ def main():
         net_io = psutil.net_io_counters()
         extIP = getIP()
         hostname = socket.gethostname()
+        ipv6 = getIPV6(extIP)
+        hostip = socket.gethostbyname(hostname)
         cpu = get_processor_name().split("@")
         uname = platform.uname()
         boot_time_timestamp = psutil.boot_time()
@@ -115,6 +127,15 @@ def main():
         totalswap = get_size(swap.total)
         freeswap = get_size(swap.free)
         usedswap = get_size(swap.used)
+        g = geocoder.ip('me')
+
+        latitude = g.latlng[0]
+        longitude = g.latlng[1]
+        app = Nominatim(user_agent="tutorial")
+        coordinates = f"{latitude}, {longitude}"
+        # sleep for a second to respect Usage Policy
+        time.sleep(1)
+        haddress = app.reverse(coordinates, language="en").raw
 
         if os.name == "nt":
             os.system('cls')
@@ -127,6 +148,7 @@ def main():
             if starttime+13.6<time.time():
                 producesyntaxedtheshit()
                 break
+            
     except Exception as e:
         producesyntaxed(f"Well, shit: {e}")
         musicgobrr.terminate()
@@ -138,27 +160,20 @@ def producesyntaxedtheshit():
         os.system('cls')
     else:
         os.system('clear')
-    producesyntaxed("Computer Name: " + hostname)
-    time.sleep(timeslept)
     producesyntaxed("External IP: " + extIP)
     time.sleep(timeslept)
-    interfaceno = 0
-    for interface_name, interface_addresses in if_addrs.items():
-        if interfaceno <= 2:
-            producesyntaxed(f"Interface: {interface_name}")
-            macno = 0
-            interfaceb4.append(interface_name)
-            interfaceno = interfaceno + 1
-            time.sleep(timeslept)
-            for address in interface_addresses:
-                if macno <= 3:
-                    producesyntaxed(f"    MAC Address: {address.address}")
-                    time.sleep(timeslept)
-                    producesyntaxed(f"        Netmask: {address.netmask}")
-                    time.sleep(timeslept)
-                    producesyntaxed(f"        Broadcast MAC: {address.broadcast}")
-                    time.sleep(timeslept)
-                    macno+=1
+    producesyntaxed("Hostname: " + hostname)
+    time.sleep(timeslept)
+    producesyntaxed("Hostname IP: " + hostip)
+    time.sleep(timeslept)
+    producesyntaxed("IPv6: " + str(ipv6))
+    time.sleep(timeslept)
+    producesyntaxed("Latitude: " + str(latitude))
+    time.sleep(timeslept)
+    producesyntaxed("Longitude: " + str(longitude))
+    time.sleep(timeslept)
+    producesyntaxed("Location: " + str(haddress['address']['town']))
+    time.sleep(timeslept)
     producesyntaxed("System Type: " + os.name)
     time.sleep(timeslept)
     producesyntaxed("OS Name: " + uname.system)
