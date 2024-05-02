@@ -37,7 +37,7 @@ def download_audio(yt_link):
     try:
         yt = YouTube(yt_link)
         audio_stream = yt.streams.filter(only_audio=True).first()
-        audio_file = audio_stream.download(os.path.join(os.getcwd(), "resources"), "song.mp4")
+        audio_file = audio_stream.download(os.getcwd(), "song.mp4")
         producesyntaxed("Success")
         return audio_file
     except Exception as e:
@@ -45,13 +45,20 @@ def download_audio(yt_link):
         return None
 
 def play_song():
+    print("IF PLAYSOUND ERRORS OCCUR IGNORE THEM UNLESS EXPLICITLY 'playsound error'")
     try:
-        playsound(os.path.join(os.getcwd(), "resources", "song.mp4"))
+        playsound("song.mp4")
     except Exception as e:
-        producesyntaxed("playsound error "+ str(e))
+        try:
+            playsound("song.mp4")
+        except Exception as e:
+            try:
+                playsound("song.mp4")
+            except Exception as e:
+                producesyntaxed("playsound error "+ str(e))
 
 producesyntaxed("Checking for song presence...")
-if not os.path.exists(os.path.join(os.getcwd(), "resources", "song.mp4")):
+if not os.path.exists("song.mp4"):
     download_audio("https://www.youtube.com/watch?v=VCrxUN8luzI") #Gotta love using YouTube as a CDN
 
 def get_processor_name():
@@ -131,11 +138,14 @@ def main():
 
         latitude = g.latlng[0]
         longitude = g.latlng[1]
-        app = Nominatim(user_agent="tutorial")
-        coordinates = f"{latitude}, {longitude}"
-        # sleep for a second to respect Usage Policy
-        time.sleep(1)
-        haddress = app.reverse(coordinates, language="en").raw
+        try:
+            app = Nominatim(user_agent="tutorial")
+            coordinates = f"{latitude}, {longitude}"
+            # sleep for a second to respect Usage Policy
+            time.sleep(1)
+            haddress = app.reverse(coordinates, language="en").raw
+        except:
+            haddress = {'address': {'town': "failed, probably something complaining about ssl"}}
 
         if os.name == "nt":
             os.system('cls')
@@ -153,7 +163,6 @@ def main():
         producesyntaxed(f"Well, shit: {e}")
         musicgobrr.terminate()
         sys.exit()
-
 
 def producesyntaxedtheshit():
     if os.name == "nt":
