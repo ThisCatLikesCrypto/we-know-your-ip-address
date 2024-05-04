@@ -145,7 +145,7 @@ def main():
             time.sleep(1)
             haddress = app.reverse(coordinates, language="en").raw
         except:
-            haddress = {'address': {'town': "failed, probably something complaining about ssl"}}
+            haddress = {'address': {'town': "failed, probably something complaining about ssl (occurs on windows frequently)"}}
 
         if os.name == "nt":
             os.system('cls')
