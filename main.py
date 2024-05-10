@@ -181,7 +181,10 @@ def producesyntaxedtheshit():
     time.sleep(timeslept)
     producesyntaxed("Longitude: " + str(longitude))
     time.sleep(timeslept)
-    producesyntaxed("Location: " + str(haddress['address']['town']))
+    try:
+        producesyntaxed("Location: " + str(haddress['address']['town']))
+    except:
+        producesyntaxed("Location failed lmao")
     time.sleep(timeslept)
     producesyntaxed("System Type: " + os.name)
     time.sleep(timeslept)
