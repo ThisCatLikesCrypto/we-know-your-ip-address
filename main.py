@@ -1,10 +1,11 @@
+# These are all installed globally on my system :)
+# Somehow no dependency hell????
 import socket
 from urllib.request import urlopen
 import datetime
 import time
 import os
 import platform
-import subprocess
 import re
 import psutil
 import multiprocessing
@@ -14,8 +15,8 @@ import sys
 import random
 import geocoder
 from geopy.geocoders import Nominatim
-import ipaddress
-
+import requests
+from cpuinfo import get_cpu_info
 
 RED = '\033[38;5;203m'
 ORANGE = '\033[38;5;208m'
@@ -62,28 +63,15 @@ if not os.path.exists("song.mp4"):
     download_audio("https://www.youtube.com/watch?v=VCrxUN8luzI") #Gotta love using YouTube as a CDN
 
 def get_processor_name():
-    if platform.system() == "Windows":
-        return platform.processor()
-    elif platform.system() == "Darwin":
-        os.environ['PATH'] = os.environ['PATH'] + os.pathsep + '/usr/sbin'
-        command ="sysctl -n machdep.cpu.brand_string"
-        return subprocess.check_output(command).strip()
-    elif platform.system() == "Linux":
-        command = "cat /proc/cpuinfo"
-        all_info = subprocess.check_output(command, shell=True).decode().strip()
-        for line in all_info.split("\n"):
-            if "model name" in line:
-                return re.sub( ".*model name.*:", "", line,1)
-    return ""
+    cpu_info = get_cpu_info()
+    return cpu_info['brand_raw'], cpu_info['hz_actual_friendly']
 
 def getIP():
     d = str(urlopen('http://checkip.dyndns.com/').read())
     return re.compile(r'Address: (\d+\.\d+\.\d+\.\d+)').search(d).group(1)
 
-def getIPV6(ip4):
-    ip4 = ipaddress.IPv4Address(ip4)
-    prefix6to4 = int(ipaddress.IPv6Address("2002::"))
-    ip6 = ipaddress.IPv6Address(prefix6to4 | (int(ip4) << 80))
+def getIPV6():
+    ip6 = requests.get('https://ipv6.icanhazip.com/').text.strip()
     return ip6
 
 def get_size(bytes, suffix="B"):
@@ -107,17 +95,10 @@ def main():
     producesyntaxed("Getting info...")
 
     try:
+        print("PSUtil stuff...")
         if_addrs = psutil.net_if_addrs()
         net_io = psutil.net_io_counters()
-        extIP = getIP()
-        hostname = socket.gethostname()
-        ipv6 = getIPV6(extIP)
-        hostip = socket.gethostbyname(hostname)
-        cpu = get_processor_name().split("@")
-        uname = platform.uname()
         boot_time_timestamp = psutil.boot_time()
-        bt = datetime.datetime.fromtimestamp(boot_time_timestamp)
-        cpufreq = psutil.cpu_freq()
         logical = psutil.cpu_count(logical=True)
         physical = psutil.cpu_count(logical=False)
         cpuuse = psutil.cpu_percent()
@@ -125,15 +106,13 @@ def main():
 
         for i, percentage in enumerate(psutil.cpu_percent(percpu=True, interval=1)):
             coresuse.append(f"Core {i}: {percentage}%")
-
         svmem = psutil.virtual_memory()
         swap = psutil.swap_memory()
-        totalmem = get_size(svmem.total)
-        availmem = get_size(svmem.available)
-        usemem = get_size(svmem.used)
-        totalswap = get_size(swap.total)
-        freeswap = get_size(swap.free)
-        usedswap = get_size(swap.used)
+
+        print("Extenal API stuff...")
+        extIP = getIP()
+        hostname = socket.gethostname()
+        ipv6 = getIPV6()
         g = geocoder.ip('me')
 
         latitude = g.latlng[0]
@@ -147,6 +126,18 @@ def main():
         except:
             haddress = {'address': {'town': "failed, probably something complaining about ssl (occurs on windows frequently)"}}
 
+        print("Other stuff...")
+        hostip = socket.gethostbyname(hostname)
+        cpu, cpufreq = get_processor_name()
+        uname = platform.uname()
+        bt = datetime.datetime.fromtimestamp(boot_time_timestamp)
+        totalmem = get_size(svmem.total)
+        availmem = get_size(svmem.available)
+        usemem = get_size(svmem.used)
+        totalswap = get_size(swap.total)
+        freeswap = get_size(swap.free)
+        usedswap = get_size(swap.used)
+
         if os.name == "nt":
             os.system('cls')
         else:
@@ -155,7 +146,7 @@ def main():
         producesyntaxed("Waiting for song...")
 
         while True:
-            if starttime+13.6<time.time():
+            if starttime+14.1<time.time():
                 producesyntaxedtheshit()
                 break
             
@@ -194,19 +185,13 @@ def producesyntaxedtheshit():
     time.sleep(timeslept)
     producesyntaxed(f"Boot Time: {bt.year}-{bt.month}-{bt.day} {bt.hour}:{bt.minute}:{bt.second}")
     time.sleep(timeslept)
-
-    producesyntaxed("CPU:" + cpu[0])
+    producesyntaxed("CPU: " + cpu)
     time.sleep(timeslept)
-    try:
-        producesyntaxed("CPU speed: " + cpu[1].removeprefix(" "))
-        time.sleep(timeslept)
-    except:
-        pass
+    producesyntaxed("CPU Speed: " + cpufreq)
+    time.sleep(timeslept)
     producesyntaxed(f"Physical cores: {physical}")
     time.sleep(timeslept)
     producesyntaxed(f"Total cores: {logical}")
-    time.sleep(timeslept)
-    producesyntaxed(f"Current Frequency: {cpufreq.current:.2f}Mhz")
     time.sleep(timeslept)
     producesyntaxed("Cores usage: ")
     time.sleep(timeslept)
