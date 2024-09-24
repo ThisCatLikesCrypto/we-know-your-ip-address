@@ -64,7 +64,11 @@ if not os.path.exists("song.mp4"):
 
 def get_processor_name():
     cpu_info = get_cpu_info()
-    return cpu_info['brand_raw'], cpu_info['hz_actual_friendly']
+    try:
+        return cpu_info['brand_raw'], cpu_info['hz_actual_friendly'] #Windows
+    except:
+        return cpu_info['brand'], cpu_info['hz_actual'] #Linux (well, Debian at least)
+    
 
 def getIP():
     d = str(urlopen('http://checkip.dyndns.com/').read())
@@ -109,10 +113,13 @@ def main():
         svmem = psutil.virtual_memory()
         swap = psutil.swap_memory()
 
-        print("Extenal API stuff...")
+        print("External API stuff...")
         extIP = getIP()
         hostname = socket.gethostname()
-        ipv6 = getIPV6()
+        try:
+            ipv6 = getIPV6()
+        except:
+            ipv6 = "failed (get IPv6 if you don't have it)"
         g = geocoder.ip('me')
 
         latitude = g.latlng[0]
