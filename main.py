@@ -1,7 +1,6 @@
 # These are all installed globally on my system :)
 # Somehow no dependency hell????
 import socket
-from urllib.request import urlopen
 import datetime
 import time
 import os
@@ -9,7 +8,6 @@ import platform
 import re
 import psutil
 import multiprocessing
-from pytube import YouTube
 from playsound import playsound
 import sys
 import random
@@ -33,17 +31,15 @@ def producesyntaxed(text):
         print(text)
 
 #Audio downloader (from youtube)
-def download_audio(yt_link):
-    producesyntaxed(f"Downloading new background song with link {yt_link}...")
+def download_audio():
+    producesyntaxed(f"Downloading new background song with link https://dl.wilburwilliams.uk/api/raw/?path=/assets/we-know-your-ip-address/song.mp4...")
     try:
-        yt = YouTube(yt_link)
-        audio_stream = yt.streams.filter(only_audio=True).first()
-        audio_file = audio_stream.download(os.getcwd(), "song.mp4")
+        audio_file = requests.get("https://dl.wilburwilliams.uk/api/raw/?path=/assets/we-know-your-ip-address/song.mp4")
+        with open("song.mp4", "wb") as f:
+            f.write(audio_file.content)
         producesyntaxed("Success")
-        return audio_file
     except Exception as e:
         producesyntaxed("Error downloading audio:" + str(e))
-        return None
 
 def play_song():
     print("IF PLAYSOUND ERRORS OCCUR IGNORE THEM UNLESS EXPLICITLY 'playsound error'")
@@ -60,7 +56,7 @@ def play_song():
 
 producesyntaxed("Checking for song presence...")
 if not os.path.exists("song.mp4"):
-    download_audio("https://www.youtube.com/watch?v=VCrxUN8luzI") #Gotta love using YouTube as a CDN
+    download_audio()
 
 def get_processor_name():
     cpu_info = get_cpu_info()
@@ -70,9 +66,9 @@ def get_processor_name():
         return cpu_info['brand'], cpu_info['hz_actual'] #Linux (well, Debian at least)
     
 
-def getIP():
-    d = str(urlopen('http://checkip.dyndns.com/').read())
-    return re.compile(r'Address: (\d+\.\d+\.\d+\.\d+)').search(d).group(1)
+def getIPv4():
+    d = requests.get('https://ipv4.icanhazip.com/').text.strip()
+    return d
 
 def getIPV6():
     ip6 = requests.get('https://ipv6.icanhazip.com/').text.strip()
@@ -114,8 +110,7 @@ def main():
         swap = psutil.swap_memory()
 
         print("External API stuff...")
-        extIP = getIP()
-        hostname = socket.gethostname()
+        extIP = getIPv4()
         try:
             ipv6 = getIPV6()
         except:
@@ -125,15 +120,14 @@ def main():
         latitude = g.latlng[0]
         longitude = g.latlng[1]
         try:
-            app = Nominatim(user_agent="tutorial")
+            app = Nominatim(user_agent="github/thiscatlikescrypto/we-know-your-ip-address")
             coordinates = f"{latitude}, {longitude}"
-            # sleep for a second to respect Usage Policy
-            time.sleep(1)
             haddress = app.reverse(coordinates, language="en").raw
         except:
             haddress = {'address': {'town': "failed, probably something complaining about ssl (occurs on windows frequently)"}}
 
         print("Other stuff...")
+        hostname = socket.gethostname()
         hostip = socket.gethostbyname(hostname)
         cpu, cpufreq = get_processor_name()
         uname = platform.uname()
@@ -167,13 +161,13 @@ def producesyntaxedtheshit():
         os.system('cls')
     else:
         os.system('clear')
-    producesyntaxed("External IP: " + extIP)
+    producesyntaxed("External IPv4: " + extIP)
+    time.sleep(timeslept)
+    producesyntaxed("IPv6: " + str(ipv6))
     time.sleep(timeslept)
     producesyntaxed("Hostname: " + hostname)
     time.sleep(timeslept)
     producesyntaxed("Hostname IP: " + hostip)
-    time.sleep(timeslept)
-    producesyntaxed("IPv6: " + str(ipv6))
     time.sleep(timeslept)
     producesyntaxed("Latitude: " + str(latitude))
     time.sleep(timeslept)
@@ -210,7 +204,7 @@ def producesyntaxedtheshit():
     producesyntaxed(f"Total CPU Usage: {cpuuse}%")
     time.sleep(timeslept)
 
-    producesyntaxed(f"Total Memory Usage: {totalmem}")
+    producesyntaxed(f"Total Memory: {totalmem}")
     time.sleep(timeslept)
     producesyntaxed(f"Available Memory: {availmem}")
     time.sleep(timeslept)
@@ -219,7 +213,7 @@ def producesyntaxedtheshit():
     producesyntaxed(f"Percentage of Memory Used: {svmem.percent}%")
     time.sleep(timeslept)
 
-    producesyntaxed(f"Total Swap Usage: {totalswap}")
+    producesyntaxed(f"Total Swap: {totalswap}")
     time.sleep(timeslept)
     producesyntaxed(f"Free Swap: {freeswap}")
     time.sleep(timeslept)
