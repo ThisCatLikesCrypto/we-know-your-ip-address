@@ -5,7 +5,7 @@ import datetime
 import time
 import os
 import platform
-import re
+import GPUtil
 import psutil
 import multiprocessing
 from playsound import playsound
@@ -22,6 +22,8 @@ GREEN = '\033[38;5;120m'
 YELLOW = '\033[38;5;226m'
 BLUE = '\033[38;5;117m' #dark-aqua sort of colour
 BLUE2 = '\033[96m' #darker blue
+
+UA = {'User-Agent': 'Mozilla/5.0 (compatible; github.com/thiscatlikescrypto/we-know-your-ip-address)'}
 
 def producesyntaxed(text):
     try:
@@ -67,11 +69,11 @@ def get_processor_name():
     
 
 def getIPv4():
-    d = requests.get('https://ipv4.icanhazip.com/').text.strip()
+    d = requests.get('https://ipv4.icanhazip.com/', headers=UA).text.strip()
     return d
 
 def getIPV6():
-    ip6 = requests.get('https://ipv6.icanhazip.com/').text.strip()
+    ip6 = requests.get('https://ipv6.icanhazip.com/', headers=UA).text.strip()
     return ip6
 
 def get_size(bytes, suffix="B"):
@@ -81,8 +83,12 @@ def get_size(bytes, suffix="B"):
             return f"{bytes:.2f}{unit}{suffix}"
         bytes /= factor
 
+def getGPU():
+    gpu0 = GPUtil.getGPUs()[0]
+    return gpu0
+
 def main():
-    global starttime, timeslept, ipv6, interfaceb4, hostip, if_addrs, net_io, extIP, hostname, cpu, uname, haddress, boot_time_timestamp, bt, cpufreq, logical, physical, cpuuse, coresuse, svmem, swap, totalmem, availmem, usemem, totalswap, freeswap, usedswap, latitude, longitude
+    global starttime, timeslept, ipv6, interfaceb4, hostip, if_addrs, net_io, extIP, hostname, cpu, uname, haddress, boot_time_timestamp, bt, cpufreq, logical, physical, cpuuse, coresuse, svmem, swap, totalmem, availmem, usemem, totalswap, freeswap, usedswap, latitude, longitude, gpu0
 
     starttime = time.time()
     timeslept = 0.488
@@ -138,6 +144,7 @@ def main():
         totalswap = get_size(swap.total)
         freeswap = get_size(swap.free)
         usedswap = get_size(swap.used)
+        gpu0 = getGPU()
 
         if os.name == "nt":
             os.system('cls')
@@ -147,7 +154,7 @@ def main():
         producesyntaxed("Waiting for song...")
 
         while True:
-            if starttime+14.1<time.time():
+            if starttime+14.2<time.time():
                 producesyntaxedtheshit()
                 break
             
@@ -220,6 +227,19 @@ def producesyntaxedtheshit():
     producesyntaxed(f"Used Swap: {usedswap}")
     time.sleep(timeslept)
     producesyntaxed(f"Percentage of Swap Used: {swap.percent}%")
+    time.sleep(timeslept)
+
+    try:
+        producesyntaxed(f"GPU0: {gpu0.name}")
+        time.sleep(timeslept)
+        producesyntaxed(f"GPU0 Memory: {gpu0.memoryUsed}")
+        time.sleep(timeslept)
+        producesyntaxed(f"GPU0 Temperature: {gpu0.temperature}")
+        time.sleep(timeslept)
+        producesyntaxed(f"GPU0 Load: {gpu0.load*100}%")
+    except:
+        producesyntaxed("GPU0 not found")
+    time.sleep(timeslept)
 
 if __name__ == "__main__":
     musicgobrr = multiprocessing.Process(target=play_song)
