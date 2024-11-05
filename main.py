@@ -84,8 +84,11 @@ def get_size(bytes, suffix="B"):
         bytes /= factor
 
 def getGPU():
-    gpu0 = GPUtil.getGPUs()[0]
-    return gpu0
+    try:
+    	gpu0 = GPUtil.getGPUs()[0]
+    	return gpu0
+    except IndexError:
+        return "fucked"
 
 def main():
     global starttime, timeslept, ipv6, interfaceb4, hostip, if_addrs, net_io, extIP, hostname, cpu, uname, haddress, boot_time_timestamp, bt, cpufreq, logical, physical, cpuuse, coresuse, svmem, swap, totalmem, availmem, usemem, totalswap, freeswap, usedswap, latitude, longitude, gpu0
@@ -122,7 +125,6 @@ def main():
         except:
             ipv6 = "failed (get IPv6 if you don't have it)"
         g = geocoder.ip('me')
-
         latitude = g.latlng[0]
         longitude = g.latlng[1]
         try:
