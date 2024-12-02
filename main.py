@@ -11,7 +11,6 @@ import multiprocessing
 from playsound import playsound
 import sys
 import random
-import geocoder
 from geopy.geocoders import Nominatim
 import requests
 from cpuinfo import get_cpu_info
@@ -76,6 +75,9 @@ def getIPV6():
     ip6 = requests.get('https://ipv6.icanhazip.com/', headers=UA).text.strip()
     return ip6
 
+def getCoords():
+    return requests.get('https://ipinfo.io/loc', headers=UA).text.strip()
+
 def get_size(bytes, suffix="B"):
     factor = 1024
     for unit in ["", "K", "M", "G", "T", "P"]:
@@ -124,9 +126,9 @@ def main():
             ipv6 = getIPV6()
         except:
             ipv6 = "failed (get IPv6 if you don't have it)"
-        g = geocoder.ip('me')
-        latitude = g.latlng[0]
-        longitude = g.latlng[1]
+        g = getCoords().split(",")
+        latitude = g[0]
+        longitude = g[1]
         try:
             app = Nominatim(user_agent="github/thiscatlikescrypto/we-know-your-ip-address")
             coordinates = f"{latitude}, {longitude}"
