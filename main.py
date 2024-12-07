@@ -24,10 +24,13 @@ BLUE2 = '\033[96m' #darker blue
 
 UA = {'User-Agent': 'Mozilla/5.0 (compatible; github.com/thiscatlikescrypto/we-know-your-ip-address)'}
 
-def producesyntaxed(text):
+def producesyntaxed(text, ifend=False):
     try:
         colour = random.choice([RED, ORANGE, GREEN, YELLOW, BLUE, BLUE2])
-        sys.stdout.write(colour + text + '\033[0m' + "\n")
+        if ifend:
+            sys.stdout.write(colour + text + '\033[0m')
+        else:
+            sys.stdout.write(colour + text + '\033[0m' + "\n")
     except Exception as e:
         print(text)
 
@@ -42,7 +45,7 @@ def download_audio():
         producesyntaxed("Error downloading audio:" + str(e))
 
 def play_song():
-    print("IF PLAYSOUND ERRORS OCCUR IGNORE THEM UNLESS EXPLICITLY 'playsound error'")
+    print("playsound will probably produce errors, you can probably ignore them")
     try:
         playsound("song.mp4")
     except Exception as e:
@@ -86,13 +89,14 @@ def get_size(bytes, suffix="B"):
 
 def getGPU():
     try:
-    	gpu0 = GPUtil.getGPUs()[0]
-    	return gpu0
+        gpu0 = GPUtil.getGPUs()[0]
+        return gpu0
     except IndexError:
         return "fucked"
 
 def main():
-    global starttime, timeslept, ipv6, interfaceb4, hostip, if_addrs, net_io, extIP, hostname, cpu, uname, haddress, boot_time_timestamp, bt, cpufreq, logical, physical, cpuuse, coresuse, svmem, swap, totalmem, availmem, usemem, totalswap, freeswap, usedswap, latitude, longitude, gpu0
+    global starttime, timeslept, ipv6, interfaceb4, hostip, if_addrs, net_io, extIP, hostname, cpu, uname, haddress, boot_time_timestamp, bt, cpufreq
+    global logical, physical, cpuuse, coresuse, svmem, swap, totalmem, availmem, usemem, totalswap, freeswap, usedswap, latitude, longitude, gpu0, username
 
     starttime = time.time()
     timeslept = 0.488
@@ -120,7 +124,10 @@ def main():
         swap = psutil.swap_memory()
 
         print("External API stuff...")
-        extIP = getIPv4()
+        try:
+            extIP = getIPv4()
+        except:
+            extIP = "failed"
         try:
             ipv6 = getIPV6()
         except:
@@ -148,6 +155,7 @@ def main():
         freeswap = get_size(swap.free)
         usedswap = get_size(swap.used)
         gpu0 = getGPU()
+        username = os.getlogin()
 
         if os.name == "nt":
             os.system('cls')
@@ -166,6 +174,13 @@ def main():
         musicgobrr.terminate()
         sys.exit()
 
+def dots():
+    for i in range(100):
+        sys.stdout.flush()
+        producesyntaxed(".", True)
+        time.sleep(timeslept/100)
+    print()
+
 def producesyntaxedtheshit():
     if os.name == "nt":
         os.system('cls')
@@ -178,6 +193,8 @@ def producesyntaxedtheshit():
     producesyntaxed("Hostname: " + hostname)
     time.sleep(timeslept)
     producesyntaxed("Hostname IP: " + hostip)
+    time.sleep(timeslept)
+    producesyntaxed("Username: " + username)
     time.sleep(timeslept)
     producesyntaxed("Latitude: " + str(latitude))
     time.sleep(timeslept)
@@ -243,6 +260,27 @@ def producesyntaxedtheshit():
     except:
         producesyntaxed("GPU0 not found")
     time.sleep(timeslept)
+
+    producesyntaxed('"Hacking" your computer (aka doing nothing)...', True)
+    dots()
+    producesyntaxed("Injecting your IP into the system (also aka doing nothing)...", True)
+    dots()
+    producesyntaxed("Injecting your username into the system (also also aka doing nothing)...", True)
+    dots()
+    producesyntaxed("maybe you should do something else instead of running this script...", True)
+    dots()
+    producesyntaxed("maybe go touch grass (or do nothing)...", True)
+    dots()
+    producesyntaxed("wait what am i doing", True)
+    dots()
+    producesyntaxed("fun fact: producesyntaxed is a stronge reference", True)
+    dots()
+    producesyntaxed("what is stronge i hear you ask", True)
+    # it is eyescary.uk/stronge
+    dots()
+    producesyntaxed("maybe you should look at the source code", True)
+    dots()
+    producesyntaxed("anyway song nearly over so cya", True)
 
 if __name__ == "__main__":
     musicgobrr = multiprocessing.Process(target=play_song)
