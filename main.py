@@ -31,9 +31,8 @@ def producesyntaxed(text):
     except Exception as e:
         print(text)
 
-#Audio downloader (from youtube)
 def download_audio():
-    producesyntaxed(f"Downloading new background song with link https://dl.wilburwilliams.uk/api/raw/?path=/assets/we-know-your-ip-address/song.mp4...")
+    producesyntaxed(f"Downloading song with link https://dl.wilburwilliams.uk/api/raw/?path=/assets/we-know-your-ip-address/song.mp4...")
     try:
         audio_file = requests.get("https://dl.wilburwilliams.uk/api/raw/?path=/assets/we-know-your-ip-address/song.mp4")
         with open("song.mp4", "wb") as f:
