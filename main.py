@@ -5,15 +5,17 @@ import datetime
 import time
 import os
 import platform
-import GPUtil
+try:
+    import GPUtil
+except:
+    pass
 import psutil
-import multiprocessing
-from playsound import playsound
 import sys
 import random
 from geopy.geocoders import Nominatim
 import requests
 from cpuinfo import get_cpu_info
+from pygame import mixer
 
 RED = '\033[38;5;203m'
 ORANGE = '\033[38;5;208m'
@@ -40,25 +42,20 @@ def download_audio():
         audio_file = requests.get("https://dl.wilburwilliams.uk/api/raw/?path=/assets/we-know-your-ip-address/song.mp4")
         with open("song.mp4", "wb") as f:
             f.write(audio_file.content)
+        os.system("ffmpeg -i song.mp4 -vn song.mp3")
+        os.remove("song.mp4")
         producesyntaxed("Success")
     except Exception as e:
         producesyntaxed("Error downloading audio:" + str(e))
 
 def play_song():
-    print("playsound will probably produce errors, you can probably ignore them")
-    try:
-        playsound("song.mp4")
-    except Exception as e:
-        try:
-            playsound("song.mp4")
-        except Exception as e:
-            try:
-                playsound("song.mp4")
-            except Exception as e:
-                producesyntaxed("playsound error "+ str(e))
+    """play song.mp3 with mixer"""
+    mixer.init()
+    mixer.music.load("song.mp3")
+    mixer.music.play()
 
 producesyntaxed("Checking for song presence...")
-if not os.path.exists("song.mp4"):
+if not os.path.exists("song.mp3"):
     download_audio()
 
 def get_processor_name():
@@ -91,7 +88,7 @@ def getGPU():
     try:
         gpu0 = GPUtil.getGPUs()[0]
         return gpu0
-    except IndexError:
+    except:
         return "fucked"
 
 def main():
@@ -99,7 +96,7 @@ def main():
     global logical, physical, cpuuse, coresuse, svmem, swap, totalmem, availmem, usemem, totalswap, freeswap, usedswap, latitude, longitude, gpu0, username
 
     starttime = time.time()
-    timeslept = 0.488
+    timeslept = 0.475
     interfaceb4 = []
 
     if os.name == "nt":
@@ -165,13 +162,12 @@ def main():
         producesyntaxed("Waiting for song...")
 
         while True:
-            if starttime+14.2<time.time():
+            if starttime+13.4<time.time():
                 producesyntaxedtheshit()
                 break
             
     except Exception as e:
         producesyntaxed(f"Well, shit: {e}")
-        musicgobrr.terminate()
         sys.exit()
 
 def dots():
@@ -282,7 +278,8 @@ def producesyntaxedtheshit():
     dots()
     producesyntaxed("anyway song nearly over so cya", True)
 
+    time.sleep(15)
+
 if __name__ == "__main__":
-    musicgobrr = multiprocessing.Process(target=play_song)
-    musicgobrr.start()
+    play_song()
     main()
